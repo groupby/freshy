@@ -51,7 +51,7 @@ var deletedModules = [];
  */
 function unload(module) {
     var path = require.resolve(module);
-    var temp = deletedModules;
+    var temp = deletedModules.slice();
     if (require.cache[path] && require.cache[path].children) {
         require.cache[path].children.forEach(function (child) {
             if(!deletedModules.includes(child.id)) {
@@ -82,12 +82,14 @@ function snapshot(module) {
 var restoredModules = [];
 function restore(module) {
     require.cache[module.id] = module;
+    var temp = restoredModules.slice();
     module.children.forEach(function (child) {
       if(!restoredModules.includes(child.id)){
           restoredModules.push(child.id);
           restore(child);
       }
     });
+    restoredModules = temp;
 }
 
 function normalize(fn) {
